@@ -47,8 +47,8 @@
 </div>
 
 <script>
-const clientId = '701273ce886348dea1e0edc9941261ae'; // Replace with your Spotify Client ID
-const redirectUri = 'https://lonkbonk133-art.github.io/spotify-minimal/'; // e.g., https://yourusername.github.io/your-repo/
+const clientId = '701273ce886348dea1e0edc9941261ae'; // <-- Replace with your Spotify Client ID
+const redirectUri = 'https://lonkbonk133-art.github.io/spotify-minimal/'; // <-- Make sure this matches exactly what's registered
 const scopes = 'user-read-private playlist-read-private';
 
 function getAccessToken() {
@@ -57,7 +57,7 @@ function getAccessToken() {
   return params.get('access_token');
 }
 
-// Redirect to Spotify login
+// When user clicks authorize, redirect to Spotify login
 document.getElementById('authBtn').onclick = () => {
   const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
   window.location = authUrl;
@@ -99,6 +99,4 @@ if (token) {
 }
 </script>
 </body>
-
 </html>
-
