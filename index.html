@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mini Spotify</title>
+<style>
+  body {
+    margin: 0; font-family: Arial, sans-serif; background: #121212; color: #fff;
+  }
+  header {
+    padding: 20px; background: #000; text-align: center; font-size: 24px;
+  }
+  #authBtn {
+    margin: 20px auto; display: block; padding: 10px 20px; background: #1DB954; color: #fff; border: none; border-radius: 25px; cursor: pointer; font-size: 16px;
+  }
+  #profile {
+    text-align: center; margin-top: 20px;
+  }
+  .section {
+    padding: 20px;
+  }
+  h2 {
+    margin-top: 0;
+  }
+  .playlist {
+    display: flex; overflow-x: auto; gap: 15px;
+  }
+  .card {
+    min-width: 150px; flex-shrink: 0; background: #333; border-radius: 8px; overflow: hidden; cursor: pointer;
+  }
+  .card img {
+    width: 100%; height: 150px; object-fit: cover;
+  }
+  .card p {
+    margin: 10px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+</style>
+</head>
+<body>
+<header>Mini Spotify</header>
+<button id="authBtn">Authorize with Spotify</button>
+<div id="profile"></div>
+<div class="section" id="playlistsSection">
+  <h2>Your Playlists</h2>
+  <div class="playlist" id="playlists"></div>
+</div>
+
+<script>
+const clientId = 'YOUR_CLIENT_ID'; // Replace with your Spotify Client ID
+const redirectUri = 'YOUR_REDIRECT_URI'; // e.g., https://yourusername.github.io/your-repo/
+const scopes = 'user-read-private playlist-read-private';
+
+function getAccessToken() {
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  return params.get('access_token');
+}
+
+// Redirect to Spotify login
+document.getElementById('authBtn').onclick = () => {
+  const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
+  window.location = authUrl;
+};
+
+const token = getAccessToken();
+
+if (token) {
+  document.getElementById('authBtn').style.display = 'none';
+
+  // Fetch user profile
+  fetch('https://api.spotify.com/v1/me', {
+    headers: { Authorization: 'Bearer ' + token }
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('profile').innerHTML = `<h3>Hello, ${data.display_name}</h3>`;
+    fetchPlaylists();
+  });
+
+  function fetchPlaylists() {
+    fetch('https://api.spotify.com/v1/me/playlists?limit=10', {
+      headers: { Authorization: 'Bearer ' + token }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const playlistsDiv = document.getElementById('playlists');
+      data.items.forEach(pl => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${pl.images[0]?.url || 'https://via.placeholder.com/150'}" />
+          <p>${pl.name}</p>
+        `;
+        playlistsDiv.appendChild(card);
+      });
+    });
+  }
+}
+</script>
+</body>
+</html>
